@@ -91,6 +91,7 @@ export function handleDecreasePositionReferral(event: DecreasePositionReferral):
     }
   }
 
+  let oldReferrer = _getOldOwner(event.params.referralCode, event.params.referrer)
   _handleChangePositionReferral(
     event.block.number,
     event.transaction.hash,
@@ -100,11 +101,15 @@ export function handleDecreasePositionReferral(event: DecreasePositionReferral):
     sizeDelta,
     event.params.referralCode,
     event.params.referrer,
+    oldReferrer,
     false
   )
 }
 
 export function handleIncreasePositionReferral(event: IncreasePositionReferral): void {
+
+  let oldReferrer = _getOldOwner(event.params.referralCode, event.params.referrer)
+
   _handleChangePositionReferral(
     event.block.number,
     event.transaction.hash,
@@ -114,8 +119,19 @@ export function handleIncreasePositionReferral(event: IncreasePositionReferral):
     event.params.sizeDelta,
     event.params.referralCode,
     event.params.referrer,
+    oldReferrer,
     true
   )
+}
+
+export function _getOldOwner(referralCode: Bytes, referrer: Address) : String {
+  let referralCodeEntity = ReferralCode.load(referralCode.toHexString())
+  if (referralCodeEntity != null && referralCodeEntity.oldOwner != null) {
+    return referralCodeEntity.oldOwner
+  } else if (referralCodeEntity != null){
+    return referralCodeEntity.owner
+  }
+  return referrer.toHexString()
 }
 
 export function handleRegisterCode(event: RegisterCode): void {
@@ -160,6 +176,7 @@ export function handleSetCodeOwner(event: SetCodeOwner): void {
     _registerCode(event.block.timestamp, event.params.code, event.params.newAccount);
    } else {
      referralCodeEntity.owner = event.params.newAccount.toHexString()
+     referralCodeEntity.oldOwner = event.params.account.toHexString()
      referralCodeEntity.save()
    }
 }
@@ -445,12 +462,14 @@ function _handleChangePositionReferral(
   volume: BigInt,
   referralCode: Bytes,
   referrer: Address,
+  oldReferrer: String,
   isIncrease: boolean
 ): void {
   let actionId = transactionHash.toHexString() + ":" + eventLogIndex.toString()
   let action = new PositionReferralAction(actionId)
   action.isIncrease = isIncrease
   action.account = referral.toHexString()
+  action.oldReferrer = oldReferrer
   action.referralCode = referralCode.toHex()
   action.referrer = referrer.toHexString()
   action.transactionHash = transactionHash.toHexString()

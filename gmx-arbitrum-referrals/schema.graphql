@@ -44,7 +44,6 @@ type ReferralVolumeRecord @entity {
 
 type ReferrerStat @entity {
   id: ID! # period start timestamp + referrer + referralCode
-
   referrer: String!
 
   volume: BigInt!
@@ -55,7 +54,8 @@ type ReferrerStat @entity {
   tradedReferrals: [TradedReferral!]! @derivedFrom(field: "referrerStat")
   tradedReferralsCount: BigInt!
   tradedReferralsCountCumulative: BigInt!
-  registeredReferrals: [RegisteredReferral!]! @derivedFrom(field: "referrerStat")
+  registeredReferrals: [RegisteredReferral!]!
+    @derivedFrom(field: "referrerStat")
   registeredReferralsCount: BigInt!
   registeredReferralsCountCumulative: BigInt!
   totalRebateUsd: BigInt!
@@ -71,6 +71,7 @@ type ReferralCode @entity {
   id: ID!
   code: String!
   owner: String!
+  oldOwner: String
 }
 
 type TradedReferral @entity {
@@ -136,6 +137,7 @@ type PositionReferralAction @entity {
   account: String!
   referralCode: String!
   referrer: String!
+  oldReferrer: String!
   isIncrease: Boolean!
   volume: BigInt!
 
@@ -151,4 +153,3 @@ enum Period {
   weekly
   total
 }
-
