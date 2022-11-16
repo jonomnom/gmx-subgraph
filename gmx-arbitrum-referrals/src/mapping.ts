@@ -493,6 +493,7 @@ function _handleChangePositionReferral(
   entity.referral = referral.toHexString()
   entity.referralCode = referralCode.toHex()
   entity.referrer = referrer.toHexString()
+  entity.oldReferrer = oldReferrer
   entity.tierId = referrerEntity.tierId
   entity.marginFee = BigInt.fromI32(10)
   entity.totalRebate = tierEntity.totalRebate
